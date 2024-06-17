@@ -8,13 +8,8 @@ dotenv.config()
 
 const { PORT } = process.env;
 
-app.use(cors({
-    credentials: true,
-    origin: [`http://localhost:${PORT}`]
-}))
-
 app.get("/", (req, res) => {
-   res.send("Hiiii")
+    res.send("It's Running")
 })
 
 app.listen(PORT)
