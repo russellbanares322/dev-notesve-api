@@ -25,7 +25,7 @@ app.use(express.json()) //req.body
 
 //Get
     app.get(DEV_NOTES, async (_, res) => {
-        const devNotes = await pool.query("SELECT * FROM tbl_devnotes");
+        const devNotes = await pool.query("SELECT * FROM tbl_devnotes ORDER BY dateCreated DESC");
 
         res.json(devNotes)
     })
