@@ -14,40 +14,46 @@ app.use(express.json()) //req.body
  //Post
     app.post(DEV_NOTES, async(req, res) => {
         try {
-            const { category, content, authorId } = req.body;
-            const newDevNote = await pool.query("INSERT INTO tbl_devnotes (category, content, authorId) VALUES($1, $2, $3)", [category, content, authorId])
+            const { category, content, author_id } = req.body;
+            const newDevNote = await pool.query("INSERT INTO tbl_devnotes (category, content, author_id) VALUES($1, $2, $3)", [category, content, author_id])
         
-            res.json(newDevNote);
+            res.json(newDevNote.rows[0]);
         } catch (error) {
             throw new Error(error.message)
         }
     })
 
-//Get
-    app.get(DEV_NOTES, async (_, res) => {
-        const devNotes = await pool.query("SELECT * FROM tbl_devnotes ORDER BY dateCreated DESC");
+    // Get notes by authorId
+    app.get(`${DEV_NOTES}`, async (req, res) => {
+        const { author_id, sort_direction } = req.body
+        //Sort direction values: 1 = Descending 0 = Ascending
+        const sortDirection = sort_direction === 1 ? "DESC" : "ASC"
+        try {
+            const devNote = await pool.query(`SELECT * FROM tbl_devnotes WHERE author_id = $1 ORDER BY date_created ${sortDirection}`, [author_id])
+           
+            res.json(devNote.rows)
+        } catch (error) {
+            throw new Error(error.message)
+        }
 
-        res.json(devNotes)
     })
 
 // Get note by id
     app.get(`${DEV_NOTES}/:id`, async (req, res) => {
         const { id  } = req.params;
-        const devNoteId = id;
+        const devnote_id = id;
 
-        const devNote = await pool.query("SELECT * FROM tbl_devnotes WHERE devNoteId = $1", [devNoteId])
+        try {
+            const devNote = await pool.query("SELECT * FROM tbl_devnotes WHERE devnote_id = $1", [devnote_id])
+            
+            res.json(devNote.rows[0])
+        } catch (error) {
+            throw new Error(error.message)
+        }
     
-        res.json(devNote)
     })
 
-// Get notes by authorId -- NEEDS TO BE FIXED
-    app.get(DEV_NOTES, async (req, res) => {
-        const { authorId } = req.body
 
-        const devNote = await pool.query("SELECT * FROM tbl_devnotes WHERE authorId = $1 ORDER BY dateCreated DESC", [authorId])
-
-        res.json(devNote)
-    })
 
 app.get("/", (_, res) => {
     res.send("GG")
