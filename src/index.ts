@@ -10,6 +10,10 @@ const app = express();
 app.use(cors())
 app.use(express.json()) //req.body
 
+/**
+ * TODO: Extract this api calls in a separate file for cleaner and readable code
+ */
+
 //Routes
     // Create new note
     app.post(DEV_NOTES, async(req, res) => {
