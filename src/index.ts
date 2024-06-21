@@ -66,10 +66,9 @@ app.use(express.json()) //req.body
     // Get note by id
     app.get(`${DEV_NOTES}/:id`, async (req, res) => {
         const { id  } = req.params;
-        const devnote_id = id;
 
         try {
-            const devNote = await pool.query("SELECT * FROM tbl_devnotes WHERE devnote_id = $1", [devnote_id])
+            const devNote = await pool.query("SELECT * FROM tbl_devnotes WHERE devnote_id = $1", [id])
             
             res.json(devNote.rows[0])
         } catch (error) {
@@ -77,11 +76,5 @@ app.use(express.json()) //req.body
         }
     
     });
-
-
-
-app.get("/", (_, res) => {
-    res.send("GG")
-})
 
 app.listen(PORT)
