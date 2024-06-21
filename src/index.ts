@@ -3,6 +3,7 @@ import cors from 'cors';
 import { pool } from './connection/db';
 import { PORT } from './constants/envKeys';
 import { DEV_NOTES } from './constants/paths';
+import { devNotesSchema } from './schemas/schemas';
 
 const app = express();
 
@@ -17,13 +18,20 @@ app.use(express.json()) //req.body
 //Routes
     // Create new note
     app.post(DEV_NOTES, async(req, res) => {
-        try {
-            const { category, content, author_id } = req.body;
-            const newDevNote = await pool.query("INSERT INTO tbl_devnotes (category, content, author_id) VALUES($1, $2, $3)", [category, content, author_id])
+        try {  
+            const { error, value } = devNotesSchema.validate(req.body);
+
+            // If validation fails, return a 400 status with the error message
+            if (error) {
+                return res.status(400).json({ error: error.details[0].message });
+            }
+
+            const { category, content, author_id } = value;
+            await pool.query("INSERT INTO tbl_devnotes (category, content, author_id) VALUES($1, $2, $3)", [category, content, author_id])
         
-            res.json(newDevNote.rows[0]);
+            res.json(`Successfully created note!`);
         } catch (error) {
-            throw new Error(error.message)
+            res.status(500).json(error.message);
         }
     });
 
@@ -32,11 +40,11 @@ app.use(express.json()) //req.body
         try {
             const { id } = req.params
             const { category, content } = req.body;
-            const updatedDevNote = await pool.query("UPDATE tbl_devnotes SET category = $1, content = $2, date_created = NOW() WHERE devnote_id = $3 RETURNING *", [category, content, id])
+             await pool.query("UPDATE tbl_devnotes SET category = $1, content = $2, date_created = NOW() WHERE devnote_id = $3 RETURNING *", [category, content, id])
 
-            res.json(updatedDevNote.rows[0])
+             res.json(`Successfully updated note!`);
         } catch (error) {
-            throw new Error(error.message)
+            res.json(error.message)
         }
     });
 
@@ -44,11 +52,11 @@ app.use(express.json()) //req.body
     app.delete(`${DEV_NOTES}/:id`, async(req, res) => {
         try {
             const { id } = req.params;
-            const deleteDevNote = await pool.query("DELETE FROM tbl_devnotes WHERE devnote_id = $1 RETURNING *", [id]);
+          await pool.query("DELETE FROM tbl_devnotes WHERE devnote_id = $1 RETURNING *", [id]);
 
-            res.json(deleteDevNote.rows[0])
+            res.json(`Successfully deleted note!`);
         } catch (error) {
-            throw new Error(error.message)
+            res.json(error.message)
         }
 
     })
@@ -63,7 +71,7 @@ app.use(express.json()) //req.body
            
             res.json(devNote.rows)
         } catch (error) {
-            throw new Error(error.message)
+            res.json(error.message)
         }
 
     });
@@ -77,7 +85,7 @@ app.use(express.json()) //req.body
             
             res.json(devNote.rows[0])
         } catch (error) {
-            throw new Error(error.message)
+            res.json(error.message)
         }
     
     });
