@@ -11,7 +11,7 @@ app.use(cors())
 app.use(express.json()) //req.body
 
 //Routes
- //Post
+    // Create new note
     app.post(DEV_NOTES, async(req, res) => {
         try {
             const { category, content, author_id } = req.body;
@@ -21,10 +21,35 @@ app.use(express.json()) //req.body
         } catch (error) {
             throw new Error(error.message)
         }
+    });
+
+    // Update note
+    app.put(DEV_NOTES, async(req, res) => {
+        try {
+            const { category, content, devnote_id } = req.body;
+            const updatedDevNote = await pool.query("UPDATE tbl_devnotes SET category = $1, content = $2, date_created = NOW() WHERE devnote_id = $3 RETURNING *", [category, content, devnote_id])
+
+            res.json(updatedDevNote.rows[0])
+        } catch (error) {
+            throw new Error(error.message)
+        }
+    });
+
+    // Delete note
+    app.delete(`${DEV_NOTES}/:id`, async(req, res) => {
+        try {
+            const { id } = req.params;
+            const deleteDevNote = await pool.query("DELETE FROM tbl_devnotes WHERE devnote_id = $1 RETURNING *", [id]);
+
+            res.json(deleteDevNote.rows[0])
+        } catch (error) {
+            throw new Error(error.message)
+        }
+
     })
 
     // Get notes by authorId
-    app.get(`${DEV_NOTES}`, async (req, res) => {
+    app.get(DEV_NOTES, async (req, res) => {
         const { author_id, sort_direction } = req.body
         //Sort direction values: 1 = Descending 0 = Ascending
         const sortDirection = sort_direction === 1 ? "DESC" : "ASC"
@@ -36,9 +61,9 @@ app.use(express.json()) //req.body
             throw new Error(error.message)
         }
 
-    })
+    });
 
-// Get note by id
+    // Get note by id
     app.get(`${DEV_NOTES}/:id`, async (req, res) => {
         const { id  } = req.params;
         const devnote_id = id;
@@ -51,7 +76,7 @@ app.use(express.json()) //req.body
             throw new Error(error.message)
         }
     
-    })
+    });
 
 
 
