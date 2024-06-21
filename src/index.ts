@@ -24,10 +24,11 @@ app.use(express.json()) //req.body
     });
 
     // Update note
-    app.put(DEV_NOTES, async(req, res) => {
+    app.put(`${DEV_NOTES}/:id`, async(req, res) => {
         try {
-            const { category, content, devnote_id } = req.body;
-            const updatedDevNote = await pool.query("UPDATE tbl_devnotes SET category = $1, content = $2, date_created = NOW() WHERE devnote_id = $3 RETURNING *", [category, content, devnote_id])
+            const { id } = req.params
+            const { category, content } = req.body;
+            const updatedDevNote = await pool.query("UPDATE tbl_devnotes SET category = $1, content = $2, date_created = NOW() WHERE devnote_id = $3 RETURNING *", [category, content, id])
 
             res.json(updatedDevNote.rows[0])
         } catch (error) {
