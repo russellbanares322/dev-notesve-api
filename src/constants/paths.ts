@@ -1,3 +1,3 @@
-const DEV_NOTES = "/devnotes"
+const DEV_NOTES = "/api/devnotes"
 
 export { DEV_NOTES }

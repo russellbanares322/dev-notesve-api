@@ -3,7 +3,7 @@ import cors from 'cors';
 import { pool } from './connection/db';
 import { PORT } from './constants/envKeys';
 import { DEV_NOTES } from './constants/paths';
-import { devNotesSchema } from './schemas/schemas';
+import { createNoteSchema, updateNoteSchema } from './schemas/devNotesSchema';
 
 const app = express();
 
@@ -11,17 +11,11 @@ const app = express();
 app.use(cors())
 app.use(express.json()) //req.body
 
-/**
- * TODO: Extract this api calls in a separate file for cleaner and readable code
- */
-
 //Routes
     // Create new note
     app.post(DEV_NOTES, async(req, res) => {
         try {  
-            const { error, value } = devNotesSchema.validate(req.body);
-
-            // If validation fails, return a 400 status with the error message
+            const { error, value } = createNoteSchema.validate(req.body);
             if (error) {
                 return res.status(400).json({ error: error.details[0].message });
             }
@@ -39,8 +33,13 @@ app.use(express.json()) //req.body
     app.put(`${DEV_NOTES}/:id`, async(req, res) => {
         try {
             const { id } = req.params
-            const { category, content } = req.body;
-             await pool.query("UPDATE tbl_devnotes SET category = $1, content = $2, date_created = NOW() WHERE devnote_id = $3 RETURNING *", [category, content, id])
+            const { error, value } = updateNoteSchema.validate(req.body);
+            if (error) {
+                return res.status(400).json({ error: error.details[0].message });
+            }
+
+            const { category, content } = value;
+             await pool.query("UPDATE tbl_devnotes SET category = $1, content = $2, date_created = NOW() WHERE devnote_id = $3", [category, content, id])
 
              res.json(`Successfully updated note!`);
         } catch (error) {
@@ -52,7 +51,7 @@ app.use(express.json()) //req.body
     app.delete(`${DEV_NOTES}/:id`, async(req, res) => {
         try {
             const { id } = req.params;
-          await pool.query("DELETE FROM tbl_devnotes WHERE devnote_id = $1 RETURNING *", [id]);
+          await pool.query("DELETE FROM tbl_devnotes WHERE devnote_id = $1", [id]);
 
             res.json(`Successfully deleted note!`);
         } catch (error) {

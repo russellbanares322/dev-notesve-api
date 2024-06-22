@@ -2,4 +2,11 @@ import dotenv from 'dotenv';
 
 dotenv.config()
 
-export const { PORT, POSTGRES_DB_SUPER_ADMIN_PASSWORD } = process.env;
+export const { 
+    PORT, 
+    PG_PASSWORD, 
+    PG_USER,
+    PG_HOST,
+    PG_PORT,
+    PG_DATABASE
+} = process.env;

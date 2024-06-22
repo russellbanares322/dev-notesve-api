@@ -1,10 +1,10 @@
-import { POSTGRES_DB_SUPER_ADMIN_PASSWORD } from "../constants/envKeys";
+import { PG_DATABASE, PG_HOST, PG_PASSWORD, PG_PORT, PG_USER } from "../constants/envKeys";
 import { Pool } from 'pg';
 
 export const pool = new Pool({
-    user: "postgres",
-    password: POSTGRES_DB_SUPER_ADMIN_PASSWORD,
-    host: "localhost",
-    port: 5432,
-    database: "db_devnotes"
+    user: PG_USER,
+    password: PG_PASSWORD,
+    host: PG_HOST,
+    port: parseInt(PG_PORT),
+    database: PG_DATABASE
 });
