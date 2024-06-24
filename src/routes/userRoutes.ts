@@ -22,4 +22,18 @@ router.post(USERS, async (req, res) => {
     }
 })
 
+// Check if user already exist
+router.get(`${USERS}/:id`, async (req, res) => {
+    try {
+        const { id } = req.params;
+        const userResponse = await pool.query("SELECT * FROM tbl_users WHERE user_id = $1", [id]);
+
+        const userDoesExist = userResponse.rows.length > 0;
+
+        res.json(userDoesExist)
+
+    } catch (error) {
+        res.status(500).json(error.message);
+    }
+})
 export default router
