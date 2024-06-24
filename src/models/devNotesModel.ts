@@ -3,7 +3,7 @@ import Joi from "joi";
 const DevNoteSchema = {
     category: Joi.string().required(),
     content: Joi.string().required(),
-    author_id: Joi.string().required(), 
+    author_id: Joi.string().required()
 }
 
 export const createNoteSchema = Joi.object(DevNoteSchema)

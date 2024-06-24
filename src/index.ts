@@ -1,7 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import { PORT } from './constants/envKeys';
-import devNotesRoutes from './routes/devNotesRoutes';
+import { devNotesRoutes, userRoutes } from './routes/routes';
 
 const app = express();
 
@@ -10,7 +10,9 @@ app.use(cors())
 app.use(express.json()) //req.body
 
 //Routes
-    // devNotesRoutes
+    // DevNotes Route
     app.use('/api', devNotesRoutes)
-
+    // User Route
+    app.use("/api", userRoutes)
+    
 app.listen(PORT)
