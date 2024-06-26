@@ -13,8 +13,8 @@ router.post(DEV_NOTES, async(req, res) => {
             return res.status(400).json({ error: error.details[0].message });
         }
 
-        const { category, content, author_id } = value;
-        await pool.query("INSERT INTO tbl_devnotes (category, content, author_id) VALUES($1, $2, $3)", [category, content, author_id])
+        const { title, category, content, author_id } = value;
+        await pool.query("INSERT INTO tbl_devnotes (title, category, content, author_id) VALUES($1, $2, $3, $4)", [title, category, content, author_id])
     
         res.json(`Successfully created note!`);
     } catch (error) {
@@ -31,8 +31,8 @@ router.put(`${DEV_NOTES}/:id`, async(req, res) => {
             return res.status(400).json({ error: error.details[0].message });
         }
 
-        const { category, content } = value;
-         await pool.query("UPDATE tbl_devnotes SET category = $1, content = $2, date_created = NOW() WHERE devnote_id = $3", [category, content, id])
+        const { title, category, content } = value;
+         await pool.query("UPDATE tbl_devnotes SET title = $1, category = $2, content = $3, date_created = NOW() WHERE devnote_id = $4", [title, category, content, id])
 
          res.json(`Successfully updated note!`);
     } catch (error) {
