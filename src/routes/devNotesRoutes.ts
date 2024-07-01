@@ -53,6 +53,7 @@ router.delete(`${DEV_NOTES}/:id`, async(req, res) => {
 
 })
 
+
 // Get notes by authorId
 router.get(DEV_NOTES, async (req, res) => {
     const { author_id, sort_direction } = req.query
@@ -68,6 +69,20 @@ router.get(DEV_NOTES, async (req, res) => {
 
 });
 
+// Get all categories create by author
+router.get(`${DEV_NOTES}/categories`, async (req, res) => {
+    const { author_id } = req.query;
+
+    try {
+        const categoriesData = await pool.query("SELECT category FROM tbl_devnotes WHERE author_id = $1 ORDER BY category ASC", [author_id]);
+        const mappedCategoriesData = categoriesData.rows.map(({ category }) => category)
+
+        res.json(mappedCategoriesData);
+    } catch (error) {
+        res.json(error.message)
+    }
+})
+
 // Get note by id
 router.get(`${DEV_NOTES}/:id`, async (req, res) => {
     const { id } = req.params;
@@ -81,18 +96,5 @@ router.get(`${DEV_NOTES}/:id`, async (req, res) => {
     }
 
 });
-
-// Get all categories create by author
-router.get(`${DEV_NOTES}/categories`, async (req, res) => {
-    const { author_id } = req.query;
-
-    try {
-        const categories = await pool.query("SELECT category FROM tbl_devnotes WHERE author_id = $1 ORDER BY category ASC", [author_id]);
-
-        res.json(categories);
-    } catch (error) {
-        res.json(error.message)
-    }
-})
 
 export default router
