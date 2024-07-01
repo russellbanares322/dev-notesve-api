@@ -70,7 +70,7 @@ router.get(DEV_NOTES, async (req, res) => {
 
 // Get note by id
 router.get(`${DEV_NOTES}/:id`, async (req, res) => {
-    const { id  } = req.params;
+    const { id } = req.params;
 
     try {
         const devNote = await pool.query("SELECT * FROM tbl_devnotes WHERE devnote_id = $1", [id])
@@ -81,5 +81,18 @@ router.get(`${DEV_NOTES}/:id`, async (req, res) => {
     }
 
 });
+
+// Get all categories create by author
+router.get(`${DEV_NOTES}/categories`, async (req, res) => {
+    const { author_id } = req.query;
+
+    try {
+        const categories = await pool.query("SELECT category FROM tbl_devnotes WHERE author_id = $1 ORDER BY category ASC", [author_id]);
+
+        res.json(categories);
+    } catch (error) {
+        res.json(error.message)
+    }
+})
 
 export default router
