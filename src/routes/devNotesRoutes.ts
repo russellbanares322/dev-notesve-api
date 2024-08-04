@@ -2,6 +2,7 @@ import express from 'express';
 import { pool } from '../connection/db';
 import { DEV_NOTES } from '../constants/paths';
 import { createNoteSchema, updateNoteSchema } from '../models/devNotesModel';
+import { responseDto } from '../lib/responseDto';
 
 const router = express.Router();
 
@@ -9,16 +10,46 @@ const router = express.Router();
 router.post(DEV_NOTES, async(req, res) => {
     try {  
         const { error, value } = createNoteSchema.validate(req.body);
+        const { title, category, content, author_id } = value;
+
+        const errorResponse = responseDto<null>({
+            success: false,
+            data: null,
+            successMessage: null,
+            statusCode: 400,
+            errorMessage: error?.details[0].message
+        })
+
+        const successResponse = responseDto<{title: string, category:string, content: string, author_id: string}>({
+            success: true,
+            data: {
+                title,
+                category,
+                content,
+                author_id
+            },
+            successMessage: "Successfully created note!",
+            statusCode: 200,
+            errorMessage: null
+        })
+
         if (error) {
-            return res.status(400).json({ error: error.details[0].message });
+            return res.json(errorResponse)
         }
 
-        const { title, category, content, author_id } = value;
         await pool.query("INSERT INTO tbl_devnotes (title, category, content, author_id) VALUES($1, $2, $3, $4)", [title, category, content, author_id])
     
-        res.json(`Successfully created note!`);
+         res.json(successResponse)
     } catch (error) {
-        res.status(500).json(error.message);
+        res.json(
+            responseDto<null>({
+                success: false,
+                data: null,
+                successMessage: null,
+                statusCode: 500,
+                errorMessage: error?.message
+            })
+        );
     }
 });
 
@@ -52,7 +83,6 @@ router.delete(`${DEV_NOTES}/:id`, async(req, res) => {
     }
 
 })
-
 
 // Get notes by authorId
 router.get(DEV_NOTES, async (req, res) => {
