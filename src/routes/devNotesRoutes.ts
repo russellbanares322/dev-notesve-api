@@ -3,6 +3,7 @@ import { pool } from '../connection/db';
 import { DEV_NOTES } from '../constants/paths';
 import { createNoteSchema, updateNoteSchema } from '../models/devNotesModel';
 import { responseDto } from '../lib/responseDto';
+import { DevNote } from '../types/types';
 
 const router = express.Router();
 
@@ -13,15 +14,13 @@ router.post(DEV_NOTES, async(req, res) => {
         const { title, category, content, author_id } = value;
 
         const errorResponse = responseDto<null>({
-            success: false,
             data: null,
             successMessage: null,
             statusCode: 400,
             errorMessage: error?.details[0].message
         })
 
-        const successResponse = responseDto<{title: string, category:string, content: string, author_id: string}>({
-            success: true,
+        const successResponse = responseDto<DevNote>({
             data: {
                 title,
                 category,
@@ -43,7 +42,6 @@ router.post(DEV_NOTES, async(req, res) => {
     } catch (error) {
         res.json(
             responseDto<null>({
-                success: false,
                 data: null,
                 successMessage: null,
                 statusCode: 500,
@@ -58,16 +56,43 @@ router.put(`${DEV_NOTES}/:id`, async(req, res) => {
     try {
         const { id } = req.params
         const { error, value } = updateNoteSchema.validate(req.body);
+        const { title, category, content, author_id } = value;
+
+        const errorResponse = responseDto<null>({
+            data: null,
+            successMessage: null,
+            statusCode: 400,
+            errorMessage: error?.details[0].message
+        })
+
+        const successResponse = responseDto<{title: string, category:string, content: string, author_id: string}>({
+            data: {
+                title,
+                category,
+                content,
+                author_id
+            },
+            successMessage: "Successfully created note!",
+            statusCode: 200,
+            errorMessage: null
+        })
+
         if (error) {
-            return res.status(400).json({ error: error.details[0].message });
+            return res.json(errorResponse)
         }
 
-        const { title, category, content } = value;
          await pool.query("UPDATE tbl_devnotes SET title = $1, category = $2, content = $3, date_created = NOW() WHERE devnote_id = $4", [title, category, content, id])
 
-         res.json(`Successfully updated note!`);
+         res.json(successResponse)
     } catch (error) {
-        res.json(error.message)
+        res.json(
+            responseDto<null>({
+                data: null,
+                successMessage: null,
+                statusCode: 500,
+                errorMessage: error?.message
+            })
+        );
     }
 });
 
