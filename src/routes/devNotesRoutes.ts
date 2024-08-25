@@ -111,11 +111,11 @@ router.delete(`${DEV_NOTES}/:id`, async(req, res) => {
 
 // Get notes by authorId
 router.get(DEV_NOTES, async (req, res) => {
-    const { author_id, sort_direction } = req.query
+    const { author_id, sort_direction, category } = req.query
     //Sort direction values: 1 = Descending 0 = Ascending
     const sortDirection = sort_direction === "1" ? "DESC" : "ASC"
     try {
-        const devNote = await pool.query(`SELECT * FROM tbl_devnotes WHERE author_id = $1 ORDER BY date_created ${sortDirection}`, [author_id])
+        const devNote = await pool.query(`SELECT * FROM tbl_devnotes WHERE author_id = $1 OR category = $2 ORDER BY date_created ${sortDirection}`, [author_id, category])
        
         res.json(devNote.rows)
     } catch (error) {
