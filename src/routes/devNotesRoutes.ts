@@ -114,14 +114,24 @@ router.get(DEV_NOTES, async (req, res) => {
     const { author_id, sort_direction, category } = req.query
     //Sort direction values: 1 = Descending 0 = Ascending
     const sortDirection = sort_direction === "1" ? "DESC" : "ASC"
+
     try {
-        const devNote = await pool.query(`SELECT * FROM tbl_devnotes WHERE author_id = $1 OR category = $2 ORDER BY date_created ${sortDirection}`, [author_id, category])
+        let queryText = `SELECT * FROM tbl_devnotes WHERE author_id = $1`;
+        let queryParams = [author_id];
+
+        if(category){
+            queryText += ` AND category = $2`;
+            queryParams.push(category);
+        }
+
+        queryText += ` ORDER BY date_created ${sortDirection}`
+
+        const devNote = await pool.query(queryText, queryParams)
        
         res.json(devNote.rows)
     } catch (error) {
         res.json(error.message)
     }
-
 });
 
 // Get all categories create by author
