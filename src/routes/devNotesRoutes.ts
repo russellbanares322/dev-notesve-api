@@ -128,7 +128,6 @@ router.get(DEV_NOTES, async (req, res) => {
        
         if(page_size){
             queryText += ` LIMIT ${page_size}`
-            queryParams.push(page_size);
         }
 
         const devNote = await pool.query(queryText, queryParams)
