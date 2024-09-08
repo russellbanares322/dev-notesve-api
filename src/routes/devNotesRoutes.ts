@@ -111,7 +111,7 @@ router.delete(`${DEV_NOTES}/:id`, async(req, res) => {
 
 // Get notes by authorId
 router.get(DEV_NOTES, async (req, res) => {
-    const { author_id, sort_direction, category } = req.query
+    const { author_id, sort_direction, category, page_size } = req.query
     //Sort direction values: 1 = Descending 0 = Ascending
     const sortDirection = sort_direction === "1" ? "DESC" : "ASC"
 
@@ -125,6 +125,11 @@ router.get(DEV_NOTES, async (req, res) => {
         }
 
         queryText += ` ORDER BY date_created ${sortDirection}`
+       
+        if(page_size){
+            queryText += ` LIMIT ${page_size}`
+            queryParams.push(page_size);
+        }
 
         const devNote = await pool.query(queryText, queryParams)
        
