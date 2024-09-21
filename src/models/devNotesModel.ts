@@ -7,8 +7,12 @@ const DevNoteSchema = {
     author_id: Joi.string().required()
 }
 
-export const paginatedNoteSchema = Joi.object({
+export const paginatedNoteParamsSchema = Joi.object({
     author_id: DevNoteSchema.author_id,
+    sort_direction: Joi.string(),
+    category: Joi.string().allow("").optional(),
+    page_size: Joi.number(),
+    page_number: Joi.number()
 })
 
 export const createNoteSchema = Joi.object(DevNoteSchema)

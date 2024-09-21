@@ -1,9 +1,9 @@
 import express from 'express';
 import { pool } from '../connection/db';
 import { DEV_NOTES } from '../constants/paths';
-import { createNoteSchema, paginatedNoteSchema, updateNoteSchema } from '../models/devNotesModel';
+import { createNoteSchema, paginatedNoteParamsSchema, updateNoteSchema } from '../models/devNotesModel';
 import { responseDto } from '../lib/responseDto';
-import { DevNote } from '../types/types';
+import { DevNote, TPagination } from '../types/types';
 
 const router = express.Router();
 
@@ -111,9 +111,8 @@ router.delete(`${DEV_NOTES}/:id`, async(req, res) => {
 
 // Get notes by authorId
 router.get(DEV_NOTES, async (req, res) => {
-    const {error, value} = paginatedNoteSchema.validate(req.body);
-    const { author_id } = value
-    const { sort_direction, category, page_size, page_number} = req.query
+    const {error, value} = paginatedNoteParamsSchema.validate(req.query);
+    const { author_id, sort_direction, category, page_size, page_number } = value
     
     //Sort direction values: 1 = Descending 0 = Ascending
     const sortDirection = sort_direction === "1" ? "DESC" : "ASC"
@@ -148,9 +147,18 @@ router.get(DEV_NOTES, async (req, res) => {
 
         const devNote = await pool.query(queryText, queryParams)
        
-      
+        const successResponse = responseDto<{items: DevNote[]} & TPagination>({
+            data: {
+                items: devNote.rows,
+                pageNumber: pageNumber,
+                pageSize: page_size
+            },
+            successMessage: null,
+            statusCode: 200,
+            errorMessage: null
+        })
 
-        res.json(devNote.rows)
+        res.json(successResponse)
     } catch (err) {
         res.json(
             responseDto<null>({

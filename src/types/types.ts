@@ -4,3 +4,8 @@ export type DevNote = {
     content: string, 
     author_id: string   
 }
+
+export type TPagination = {
+    pageNumber: number,
+    pageSize: number
+}
