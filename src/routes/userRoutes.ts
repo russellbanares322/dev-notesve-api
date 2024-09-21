@@ -36,4 +36,7 @@ router.get(`${USERS}/is-user-exist/:id`, async (req, res) => {
         res.status(500).json(error.message);
     }
 })
+
+
+
 export default router

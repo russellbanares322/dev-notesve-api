@@ -1,6 +1,7 @@
 
 type TStatusCode = 500 | 400 | 200
 
+
 type Response<T> = {
     data: T | null, 
     successMessage: string | null, 
