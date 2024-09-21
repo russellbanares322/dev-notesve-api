@@ -6,6 +6,7 @@ export type DevNote = {
 }
 
 export type TPagination = {
+    totalPages: number
     pageNumber: number,
     pageSize: number
 }
