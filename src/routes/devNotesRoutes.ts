@@ -1,7 +1,7 @@
 import express from 'express';
 import { pool } from '../connection/db';
 import { DEV_NOTES } from '../constants/paths';
-import { createNoteSchema, updateNoteSchema } from '../models/devNotesModel';
+import { createNoteSchema, paginatedNoteSchema, updateNoteSchema } from '../models/devNotesModel';
 import { responseDto } from '../lib/responseDto';
 import { DevNote } from '../types/types';
 
@@ -111,10 +111,14 @@ router.delete(`${DEV_NOTES}/:id`, async(req, res) => {
 
 // Get notes by authorId
 router.get(DEV_NOTES, async (req, res) => {
-    const { author_id, sort_direction, category, page_size, page_number} = req.query
+    const {error, value} = paginatedNoteSchema.validate(req.body);
+    const { author_id } = value
+    const { sort_direction, category, page_size, page_number} = req.query
+    
     //Sort direction values: 1 = Descending 0 = Ascending
     const sortDirection = sort_direction === "1" ? "DESC" : "ASC"
     const pageNumber = Number(page_number)
+
 
     try {
         let queryText = `SELECT * FROM tbl_devnotes WHERE author_id = $1`;
@@ -131,11 +135,31 @@ router.get(DEV_NOTES, async (req, res) => {
             queryText += ` LIMIT ${page_size} OFFSET (${pageNumber - 1}) * ${page_size}`
         }
 
+        const errorResponse = responseDto<null>({
+            data: null,
+            successMessage: null,
+            statusCode: 400,
+            errorMessage: error?.details[0].message
+        })
+
+        if(error){
+            return res.json(errorResponse)
+        }
+
         const devNote = await pool.query(queryText, queryParams)
        
+      
+
         res.json(devNote.rows)
-    } catch (error) {
-        res.json(error.message)
+    } catch (err) {
+        res.json(
+            responseDto<null>({
+                data: null,
+                successMessage: null,
+                statusCode: 500,
+                errorMessage: err?.message
+            })
+        );
     }
 });
 
