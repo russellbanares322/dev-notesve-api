@@ -128,6 +128,9 @@ router.get(DEV_NOTES, async (req, res) => {
             queryParams.push(category);
         }
 
+        // Data that will handle the totalPages value
+        const allDevNote = await pool.query(queryText, queryParams);
+
         queryText += ` ORDER BY date_created ${sortDirection}`
        
         if(page_size && page_number){
@@ -146,7 +149,7 @@ router.get(DEV_NOTES, async (req, res) => {
         }
 
         const devNote = await pool.query(queryText, queryParams)
-        const allDevNote = await pool.query("SELECT * FROM tbl_devnotes WHERE author_id = $1", [author_id]);
+       
 
         const successResponse = responseDto<{items: DevNote[]} & TPagination>({
             data: {
