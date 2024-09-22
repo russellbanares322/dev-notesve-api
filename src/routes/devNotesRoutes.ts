@@ -178,7 +178,7 @@ router.get(`${DEV_NOTES}/categories`, async (req, res) => {
     const { author_id } = req.query;
 
     try {
-        const categoriesData = await pool.query("SELECT category FROM tbl_devnotes WHERE author_id = $1 ORDER BY category ASC", [author_id]);
+        const categoriesData = await pool.query("SELECT DISTINCT ON (category) category FROM tbl_devnotes WHERE author_id = $1 ORDER BY category ASC", [author_id]);
         const mappedCategoriesData = categoriesData.rows.map(({ category }) => category)
 
         res.json(mappedCategoriesData);
