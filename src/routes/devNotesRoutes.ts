@@ -120,7 +120,7 @@ router.get(DEV_NOTES, async (req, res) => {
 
 
     try {
-        let queryText = `SELECT * FROM tbl_devnotes WHERE author_id = $1`;
+        let queryText = "SELECT * FROM tbl_devnotes WHERE author_id = $1";
         let queryParams = [author_id];
 
         if(category){
@@ -146,11 +146,12 @@ router.get(DEV_NOTES, async (req, res) => {
         }
 
         const devNote = await pool.query(queryText, queryParams)
-       
+        const allDevNote = await pool.query("SELECT * FROM tbl_devnotes WHERE author_id = $1", [author_id]);
+
         const successResponse = responseDto<{items: DevNote[]} & TPagination>({
             data: {
                 items: devNote.rows,
-                totalPages: devNote.rowCount,
+                totalPages: allDevNote.rowCount,
                 pageNumber: pageNumber,
                 pageSize: page_size
             },
