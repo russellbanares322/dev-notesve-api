@@ -72,7 +72,7 @@ router.put(`${DEV_NOTES}/:id`, async(req, res) => {
                 content,
                 author_id
             },
-            successMessage: "Successfully created note!",
+            successMessage: "Successfully updated note!",
             statusCode: 200,
             errorMessage: null
         })
@@ -112,7 +112,7 @@ router.delete(`${DEV_NOTES}/:id`, async(req, res) => {
 // Get notes by authorId
 router.get(DEV_NOTES, async (req, res) => {
     const {error, value} = paginatedNoteParamsSchema.validate(req.query);
-    const { author_id, sort_direction, category, page_size, page_number } = value
+    const { search, author_id, sort_direction, category, page_size, page_number } = value
     
     //Sort direction values: 1 = Descending 0 = Ascending
     const sortDirection = sort_direction === "1" ? "DESC" : "ASC"
@@ -126,6 +126,10 @@ router.get(DEV_NOTES, async (req, res) => {
         if(category){
             queryText += ` AND category = $2`;
             queryParams.push(category);
+        }
+
+        if(search){
+            queryText += ` AND title LIKE '%${search}%' OR content LIKE '%${search}%'`
         }
 
         // Data that will handle the totalPages value

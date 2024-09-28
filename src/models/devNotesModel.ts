@@ -8,6 +8,7 @@ const DevNoteSchema = {
 }
 
 export const paginatedNoteParamsSchema = Joi.object({
+    search: Joi.string().allow("").optional(),
     author_id: DevNoteSchema.author_id,
     sort_direction: Joi.string(),
     category: Joi.string().allow("").optional(),
