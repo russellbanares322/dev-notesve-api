@@ -56,7 +56,7 @@ router.put(`${DEV_NOTES}/:id`, async(req, res) => {
     try {
         const { id } = req.params
         const { error, value } = updateNoteSchema.validate(req.body);
-        const { title, category, content, author_id } = value;
+        const { title, category, content} = value;
 
         const errorResponse = responseDto<null>({
             data: null,
@@ -65,12 +65,11 @@ router.put(`${DEV_NOTES}/:id`, async(req, res) => {
             errorMessage: error?.details[0].message
         })
 
-        const successResponse = responseDto<{title: string, category:string, content: string, author_id: string}>({
+        const successResponse = responseDto<{title: string, category:string, content: string}>({
             data: {
                 title,
                 category,
                 content,
-                author_id
             },
             successMessage: "Successfully updated note!",
             statusCode: 200,
@@ -149,7 +148,7 @@ router.get(DEV_NOTES, async (req, res) => {
         })
 
         if(error){
-            return res.json(errorResponse)
+            return res.status(400).send(errorResponse)
         }
 
         const devNote = await pool.query(queryText, queryParams)
