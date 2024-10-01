@@ -33,14 +33,14 @@ router.post(DEV_NOTES, async(req, res) => {
         })
 
         if (error) {
-            return res.json(errorResponse)
+            return res.status(400).json(errorResponse)
         }
 
         await pool.query("INSERT INTO tbl_devnotes (title, category, content, author_id) VALUES($1, $2, $3, $4)", [title, category, content, author_id])
     
          res.json(successResponse)
     } catch (error) {
-        res.json(
+        res.status(500).json(
             responseDto<null>({
                 data: null,
                 successMessage: null,
@@ -77,14 +77,14 @@ router.put(`${DEV_NOTES}/:id`, async(req, res) => {
         })
 
         if (error) {
-            return res.json(errorResponse)
+            return res.status(400).json(errorResponse)
         }
 
          await pool.query("UPDATE tbl_devnotes SET title = $1, category = $2, content = $3, date_created = NOW() WHERE devnote_id = $4", [title, category, content, id])
 
          res.json(successResponse)
     } catch (error) {
-        res.json(
+        res.status(500).json(
             responseDto<null>({
                 data: null,
                 successMessage: null,
@@ -101,9 +101,13 @@ router.delete(`${DEV_NOTES}/:id`, async(req, res) => {
         const { id } = req.params;
       await pool.query("DELETE FROM tbl_devnotes WHERE devnote_id = $1", [id]);
 
-        res.json(`Successfully deleted note!`);
+        res.json("Successfully deleted note!");
+
+        if(!id){
+            res.status(400).json("Please provide a valid id.")
+        }
     } catch (error) {
-        res.json(error.message)
+        res.status(500).json(error.message)
     }
 
 })
@@ -148,7 +152,7 @@ router.get(DEV_NOTES, async (req, res) => {
         })
 
         if(error){
-            return res.status(400).send(errorResponse)
+            return res.status(400).json(errorResponse)
         }
 
         const devNote = await pool.query(queryText, queryParams)
@@ -168,7 +172,7 @@ router.get(DEV_NOTES, async (req, res) => {
 
         res.json(successResponse)
     } catch (err) {
-        res.json(
+        res.status(500).json(
             responseDto<null>({
                 data: null,
                 successMessage: null,
@@ -188,8 +192,12 @@ router.get(`${DEV_NOTES}/categories`, async (req, res) => {
         const mappedCategoriesData = categoriesData.rows.map(({ category }) => category)
 
         res.json(mappedCategoriesData);
+
+        if(!author_id){
+            res.status(400).json("Please provide a valid author id.")
+        }
     } catch (error) {
-        res.json(error.message)
+        res.status(500).json(error.message)
     }
 })
 
@@ -201,8 +209,11 @@ router.get(`${DEV_NOTES}/:id`, async (req, res) => {
         const devNote = await pool.query("SELECT * FROM tbl_devnotes WHERE devnote_id = $1", [id])
         
         res.json(devNote.rows[0])
+        if(!id){
+            res.status(400).json("Please provide a valid note id.")
+        }
     } catch (error) {
-        res.json(error.message)
+        res.status(500).json(error.message)
     }
 
 });
