@@ -160,7 +160,7 @@ router.get(DEV_NOTES, async (req, res) => {
 
         const successResponse = responseDto<{items: DevNote[]} & TPagination>({
             data: {
-                items: devNote.rows,
+                items: devNote?.rows?.filter((item) => item.author_id === author_id),
                 totalPages: allDevNote.rowCount,
                 pageNumber: pageNumber,
                 pageSize: page_size
