@@ -28,9 +28,9 @@ router.get(`${USERS}/is-user-exist/:id`, async (req, res) => {
         const { id } = req.params;
         const userResponse = await pool.query("SELECT * FROM tbl_users WHERE user_id = $1", [id]);
 
-        const userDoesExist = userResponse.rows.length > 0;
+        const isUserPresent = userResponse.rows.length > 0;
 
-        res.json(userDoesExist)
+        res.json(isUserPresent)
 
     } catch (error) {
         res.status(500).json(error.message);
