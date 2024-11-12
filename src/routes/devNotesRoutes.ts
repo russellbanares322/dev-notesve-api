@@ -11,7 +11,7 @@ const router = express.Router();
 router.post(DEV_NOTES, async(req, res) => {
     try {  
         const { error, value } = createNoteSchema.validate(req.body);
-        const { title, category, content, author_id } = value;
+        const { title, category, content, user_id } = value;
 
         const errorResponse = responseDto<null>({
             data: null,
@@ -25,7 +25,7 @@ router.post(DEV_NOTES, async(req, res) => {
                 title,
                 category,
                 content,
-                author_id
+                user_id
             },
             successMessage: "Successfully created note!",
             statusCode: 200,
@@ -36,7 +36,7 @@ router.post(DEV_NOTES, async(req, res) => {
             return res.status(400).json(errorResponse)
         }
 
-        await pool.query("INSERT INTO tbl_devnotes (title, category, content, author_id) VALUES($1, $2, $3, $4)", [title, category, content, author_id])
+        await pool.query("INSERT INTO tbl_devnotes (title, category, content, user_id) VALUES($1, $2, $3, $4)", [title, category, content, user_id])
     
          res.json(successResponse)
     } catch (error) {
@@ -115,7 +115,7 @@ router.delete(`${DEV_NOTES}/:id`, async(req, res) => {
 // Get notes by authorId
 router.get(DEV_NOTES, async (req, res) => {
     const {error, value} = paginatedNoteParamsSchema.validate(req.query);
-    const { search, author_id, sort_direction, category, page_size, page_number } = value
+    const { search, user_id, sort_direction, category, page_size, page_number } = value
     
     //Sort direction values: 1 = Descending 0 = Ascending
     const sortDirection = sort_direction === "1" ? "DESC" : "ASC"
@@ -123,8 +123,8 @@ router.get(DEV_NOTES, async (req, res) => {
 
 
     try {
-        let queryText = "SELECT * FROM tbl_devnotes WHERE author_id = $1";
-        let queryParams = [author_id];
+        let queryText = "SELECT * FROM tbl_devnotes WHERE user_id = $1";
+        let queryParams = [user_id];
 
         if(category){
             queryText += ` AND category = $2`;
@@ -160,7 +160,7 @@ router.get(DEV_NOTES, async (req, res) => {
 
         const successResponse = responseDto<{items: DevNote[]} & TPagination>({
             data: {
-                items: devNote?.rows?.filter((item) => item.author_id === author_id),
+                items: devNote?.rows?.filter((item) => item.user_id === user_id),
                 totalPages: allDevNote.rowCount,
                 pageNumber: pageNumber,
                 pageSize: page_size
@@ -185,15 +185,15 @@ router.get(DEV_NOTES, async (req, res) => {
 
 // Get all categories create by author
 router.get(`${DEV_NOTES}/categories`, async (req, res) => {
-    const { author_id } = req.query;
+    const { user_id } = req.query;
 
     try {
-        const categoriesData = await pool.query("SELECT DISTINCT ON (category) category FROM tbl_devnotes WHERE author_id = $1 ORDER BY category ASC", [author_id]);
+        const categoriesData = await pool.query("SELECT DISTINCT ON (category) category FROM tbl_devnotes WHERE user_id = $1 ORDER BY category ASC", [user_id]);
         const mappedCategoriesData = categoriesData.rows.map(({ category }) => category)
 
         res.json(mappedCategoriesData);
 
-        if(!author_id){
+        if(!user_id){
             res.status(400).json("Please provide a valid author id.")
         }
     } catch (error) {
